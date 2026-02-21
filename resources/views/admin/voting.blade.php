@@ -141,25 +141,119 @@
             cursor: not-allowed;
         }
 
-        #winner-display {
-            margin-top: 20px;
-            font-size: 24px;
-            font-weight: 700;
-            color: #a78bfa;
-            min-height: 36px;
-            text-align: center;
-            opacity: 0;
-            transition: opacity 0.5s;
-        }
-
-        #winner-display.show {
-            opacity: 1;
-        }
-
         .participant-count {
             margin-bottom: 20px;
             font-size: 14px;
             color: #94a3b8;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+
+        .modal-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            background: rgba(30, 41, 59, 0.9);
+            border: 1px solid rgba(167, 139, 250, 0.3);
+            border-radius: 24px;
+            padding: 40px;
+            width: 100%;
+            max-width: 480px;
+            text-align: center;
+            box-shadow: 0 32px 64px rgba(0, 0, 0, 0.5);
+            transform: scale(0.9);
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .modal-overlay.show .modal-content {
+            transform: scale(1);
+        }
+
+        .winner-badge {
+            background: rgba(167, 139, 250, 0.2);
+            color: #a78bfa;
+            padding: 8px 16px;
+            border-radius: 100px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 24px;
+            display: inline-block;
+        }
+
+        .winner-name-large {
+            font-size: 36px;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 16px;
+            line-height: 1.2;
+        }
+
+        .winner-detail {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 32px;
+            text-align: left;
+        }
+
+        .detail-item {
+            margin-bottom: 12px;
+        }
+
+        .detail-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .detail-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #94a3b8;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+
+        .detail-value {
+            font-size: 15px;
+            color: #f8fafc;
+            font-weight: 600;
+        }
+
+        .btn-close-modal {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #7c3aed, #a855f7);
+            border: none;
+            border-radius: 12px;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-close-modal:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(124, 58, 237, 0.4);
         }
     </style>
 </head>
@@ -184,7 +278,27 @@
 
         <div class="controls">
             <button id="spin-btn" class="btn-spin">SPIN WHEEL!</button>
-            <div id="winner-display">Pemenang: <span id="winner-name"></span></div>
+        </div>
+    </div>
+
+    <!-- Winner Modal -->
+    <div id="winner-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="winner-badge">🏆 Winner!</div>
+            <div id="modal-name" class="winner-name-large">Nama Pemenang</div>
+
+            <div class="winner-detail">
+                <div class="detail-item">
+                    <div class="detail-label">No HP / WhatsApp</div>
+                    <div id="modal-hp" class="detail-value">08123456789</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Alamat</div>
+                    <div id="modal-alamat" class="detail-value">Jl. Contoh Alamat No. 123</div>
+                </div>
+            </div>
+
+            <button onclick="closeModal()" class="btn-close-modal">Selesai & Tutup</button>
         </div>
     </div>
 
@@ -193,8 +307,6 @@
         const canvas = document.getElementById('wheel');
         const ctx = canvas.getContext('2d');
         const spinBtn = document.getElementById('spin-btn');
-        const winnerDisplay = document.getElementById('winner-display');
-        const winnerName = document.getElementById('winner-name');
 
         let currentRotation = 0;
         let isSpinning = false;
@@ -253,7 +365,6 @@
 
             isSpinning = true;
             spinBtn.disabled = true;
-            winnerDisplay.classList.remove('show');
 
             const numSegments = participants.length;
             const extraSpins = 5 + Math.random() * 5; // 5 to 10 full rotations
@@ -281,13 +392,19 @@
                 if (winnerIndex < 0) winnerIndex += numSegments;
 
                 const winner = participants[winnerIndex];
-                winnerName.textContent = winner.nama;
-                winnerDisplay.classList.add('show');
+
+                // Set winner details in modal
+                document.getElementById('modal-name').textContent = winner.nama;
+                document.getElementById('modal-hp').textContent = winner.no_hp;
+                document.getElementById('modal-alamat').textContent = winner.alamat;
+
+                // Show modal
+                document.getElementById('winner-modal').classList.add('show');
 
                 // Confetti!
                 confetti({
-                    particleCount: 150,
-                    spread: 70,
+                    particleCount: 200,
+                    spread: 90,
                     origin: {
                         y: 0.6
                     },
@@ -295,6 +412,10 @@
                 });
             }, 5000);
         });
+
+        function closeModal() {
+            document.getElementById('winner-modal').classList.remove('show');
+        }
 
         drawWheel();
     </script>

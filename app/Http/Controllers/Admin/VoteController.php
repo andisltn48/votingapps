@@ -10,7 +10,7 @@ class VoteController extends Controller
 {
     public function index()
     {
-        $participants = Participant::select('id', 'nama')->get();
+        $participants = Participant::select('id', 'nama', 'no_hp', 'alamat')->get();
         return view('admin.voting', compact('participants'));
     }
 }

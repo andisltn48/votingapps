@@ -166,6 +166,98 @@
             </div>
         </div>
 
+        <style>
+            .filter-card {
+                background: rgba(255, 255, 255, 0.03);
+                border: 1px solid rgba(255, 255, 255, 0.05);
+                border-radius: 20px;
+                padding: 24px;
+                margin-bottom: 32px;
+            }
+
+            .filter-form {
+                display: flex;
+                gap: 16px;
+                align-items: flex-end;
+                flex-wrap: wrap;
+            }
+
+            .filter-group {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+                flex: 1;
+                min-width: 200px;
+            }
+
+            .filter-group label {
+                font-size: 13px;
+                color: #94a3b8;
+                font-weight: 600;
+            }
+
+            .filter-group input {
+                background: rgba(255, 255, 255, 0.05);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 10px;
+                padding: 10px 14px;
+                color: #fff;
+                outline: none;
+                font-size: 14px;
+            }
+
+            .filter-group input:focus {
+                border-color: #a78bfa;
+            }
+
+            .btn-filter {
+                background: #a78bfa;
+                color: #0f172a;
+                padding: 10px 24px;
+                border-radius: 100px;
+                font-weight: 700;
+                border: none;
+                cursor: pointer;
+                font-size: 14px;
+                height: 42px;
+            }
+
+            .btn-reset {
+                background: transparent;
+                color: #94a3b8;
+                border: 1px solid #94a3b8;
+                padding: 10px 24px;
+                border-radius: 100px;
+                height: 42px;
+                text-decoration: none;
+                font-size: 14px;
+                font-weight: 600;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+        </style>
+
+        <div class="filter-card">
+            <form action="{{ route('admin.dashboard') }}" method="GET" class="filter-form">
+                <div class="filter-group">
+                    <label>Cari Nama / No HP</label>
+                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari...">
+                </div>
+                <div class="filter-group">
+                    <label>Filter Tanggal</label>
+                    <input type="date" name="date" value="{{ request('date') }}">
+                </div>
+                <button type="submit" class="btn-filter">Filter</button>
+                <a href="{{ route('admin.pendaftar.export', request()->query()) }}" class="btn-filter"
+                    style="background: #10b981; text-decoration: none; display: flex; align-items: center; justify-content: center;">📊
+                    Unduh Excel</a>
+                @if (request('search') || request('date'))
+                    <a href="{{ route('admin.dashboard') }}" class="btn-reset">Reset</a>
+                @endif
+            </form>
+        </div>
+
         <div class="table-container">
             <table>
                 <thead>
@@ -173,7 +265,7 @@
                         <th>Nama</th>
                         <th>No HP</th>
                         <th>Alamat</th>
-                        <th>Terdaftar</th>
+                        <th>Waktu Mendaftar</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
@@ -183,7 +275,11 @@
                             <td>{{ $p->nama }}</td>
                             <td>{{ $p->no_hp }}</td>
                             <td>{{ $p->alamat }}</td>
-                            <td>{{ $p->created_at->diffForHumans() }}</td>
+                            <td>
+                                <div style="font-weight: 600;">{{ $p->created_at->format('d M Y') }}</div>
+                                <div style="font-size: 11px; color: #94a3b8; margin-top: 2px;">
+                                    {{ $p->created_at->diffForHumans() }}</div>
+                            </td>
                             <td>
                                 <form action="{{ route('admin.pendaftar.destroy', $p->id) }}" method="POST"
                                     onsubmit="return confirm('Yakin hapus?')">

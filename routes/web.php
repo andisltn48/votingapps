@@ -20,6 +20,7 @@ Route::prefix('admin')->group(function () {
     // Protected Admin Routes
     Route::middleware([EnsureIsAdmin::class])->group(function () {
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
+        Route::get('/pendaftar/export', [AdminDashboardController::class, 'export'])->name('admin.pendaftar.export');
         Route::delete('/pendaftar/{id}', [AdminDashboardController::class, 'destroy'])->name('admin.pendaftar.destroy');
 
         Route::get('/voting', [\App\Http\Controllers\Admin\VoteController::class, 'index'])->name('admin.voting');
